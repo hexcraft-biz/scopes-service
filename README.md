@@ -56,7 +56,7 @@ $ docker-compose -f dev.yml up --build -d
   - 400
   - 500
 
-### POST /scopes/v1/scopes/:name
+### POST /scopes/v1/scopes
 - Params
   - Headers
     - Content-Type : application/json
@@ -81,7 +81,7 @@ $ docker-compose -f dev.yml up --build -d
   - 409
   - 500
 
-### DELETE /scopes/v1/scopes/:name
+### DELETE /scopes/v1/scopes
 - Params
   - QueryString
     - resourceDomainName
