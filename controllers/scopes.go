@@ -66,10 +66,10 @@ func (ctrl *Scopes) GetOne() gin.HandlerFunc {
 }
 
 type listParams struct {
-	ResourceDomainName string `form:"resourceDomainName" binding:"max=128"`
-	ResourceName       string `form:"resourceName" binding:"max=128"`
-	Name               string `form:"name"`
-	Type               string `form:"type" binding:"oneof='' 'public' 'private'"`
+	ResourceDomainName string `form:"resourceDomainName" binding:"omitempty,max=128"`
+	ResourceName       string `form:"resourceName" binding:"omitempty,max=128"`
+	Name               string `form:"name" binding:"omitempty"`
+	Type               string `form:"type" binding:"omitempty,oneof='public' 'private'"`
 	Limit              string `form:"limit,default=20"`
 	Offset             string `form:"offset,default=0"`
 }
