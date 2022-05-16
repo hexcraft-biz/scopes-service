@@ -162,12 +162,17 @@ func (ctrl *Scopes) DeleteByDomainName() gin.HandlerFunc {
 			return
 		}
 
-		if _, err := models.NewScopesTableEngine(ctrl.DB).DeleteByDomainName(params.ResourceDomainName); err != nil {
+		if rowsAffected, err := models.NewScopesTableEngine(ctrl.DB).DeleteByDomainName(params.ResourceDomainName); err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 			return
 		} else {
-			c.AbortWithStatusJSON(http.StatusNoContent, gin.H{"message": http.StatusText(http.StatusNoContent)})
-			return
+			if rowsAffected == 0 {
+				c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": http.StatusText(http.StatusNotFound)})
+				return
+			} else {
+				c.AbortWithStatusJSON(http.StatusNoContent, gin.H{"message": http.StatusText(http.StatusNoContent)})
+				return
+			}
 		}
 	}
 }
