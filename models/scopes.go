@@ -1,18 +1,13 @@
 package models
 
 import (
-	"crypto/rand"
 	"database/sql"
-	"io"
+	"reflect"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/hexcraft-biz/model"
 	"github.com/jmoiron/sqlx"
-	"golang.org/x/crypto/bcrypt"
-)
-
-const (
-	PW_SALT_BYTES = 16
 )
 
 //================================================================
@@ -26,26 +21,40 @@ type EntityScope struct {
 	Type               string `db:"type"`
 }
 
-func (u *EntityScope) GetAbsScope() (*AbsScope, error) {
+func (s *EntityScope) GetAbsScope() (*AbsScope, error) {
 	return &AbsScope{
-		ID:                 *u.ID,
-		ResourceDomainName: u.ResourceDomainName,
-		ResourceName:       u.ResourceName,
-		Name:               u.Name,
-		Type:               u.Type,
-		CreatedAt:          u.Ctime.Format("2006-01-02 15:04:05"),
-		UpdatedAt:          u.Mtime.Format("2006-01-02 15:04:05"),
+		ID:                 *s.ID,
+		ResourceDomainName: s.ResourceDomainName,
+		ResourceName:       s.ResourceName,
+		Name:               s.Name,
+		Type:               s.Type,
+		CreatedAt:          s.Ctime.Format("2006-01-02 15:04:05"),
+		UpdatedAt:          s.Mtime.Format("2006-01-02 15:04:05"),
 	}, nil
 }
 
 type AbsScope struct {
 	ID                 uuid.UUID `json:"id"`
-	ResourceDomainName string    `json:"resource_domain_name"`
-	ResourceName       string    `json:"resource_name"`
+	ResourceDomainName string    `json:"resourceDomainName"`
+	ResourceName       string    `json:"resourceName"`
 	Name               string    `json:"name"`
 	Type               string    `json:"type"`
-	CreatedAt          string    `json:"created_at"`
-	UpdatedAt          string    `json:"updated_at"`
+	CreatedAt          string    `json:"createdAt"`
+	UpdatedAt          string    `json:"updatedAt"`
+}
+
+type EntityScopes []EntityScope
+type AbsScopes []AbsScope
+
+func (s *EntityScopes) GetAbsScopes() (*AbsScopes, error) {
+	absScopes := AbsScopes{}
+
+	for _, scope := range *s {
+		abs, _ := scope.GetAbsScope()
+		absScopes = append(absScopes, *abs)
+	}
+
+	return &absScopes, nil
 }
 
 //================================================================
@@ -55,42 +64,77 @@ type ScopesTableEngine struct {
 	*model.Engine
 }
 
-func NewUsersTableEngine(db *sqlx.DB) *ScopesTableEngine {
+func NewScopesTableEngine(db *sqlx.DB) *ScopesTableEngine {
 	return &ScopesTableEngine{
-		Engine: model.NewEngine(db, "users"),
+		Engine: model.NewEngine(db, "scopes"),
 	}
 }
 
-func (e *ScopesTableEngine) Insert(identity string, password string, status string) (*EntityScope, error) {
-	saltBytes := make([]byte, PW_SALT_BYTES)
-	if _, err := io.ReadFull(rand.Reader, saltBytes); err != nil {
-		return nil, err
-	}
-	salt := string(saltBytes)
+func (e *ScopesTableEngine) Insert(resourceDomainName string, resourceName string, name string, typeStr string) (*EntityScope, error) {
 
-	pwdBytes := []byte(password + salt)
-
-	hashBytes, hashErr := bcrypt.GenerateFromPassword(pwdBytes, bcrypt.DefaultCost)
-	if hashErr != nil {
-		return nil, hashErr
+	s := &EntityScope{
+		Prototype:          model.NewPrototype(),
+		ResourceDomainName: resourceDomainName,
+		ResourceName:       resourceName,
+		Name:               name,
+		Type:               typeStr,
 	}
 
-	u := &EntityScope{
-		Prototype: model.NewPrototype(),
-		Identity:  identity,
-		Password:  hashBytes,
-		Salt:      saltBytes,
-		Status:    status,
-	}
-
-	_, err := e.Engine.Insert(u)
-	return u, err
+	_, err := e.Engine.Insert(s)
+	return s, err
 }
 
-func (e *ScopesTableEngine) List(id string) (*EntityScope, error) {
-	rows := []EntityScope{}
-	q := `SELECT * FROM ` + e.TblName + ` WHERE id = UUID_TO_BIN(?);`
-	if err := e.Engine.Get(&row, q, id); err != nil {
+type ScopeListQuery struct {
+	ResourceDomainName string
+	ResourceName       string
+	Name               interface{}
+	Type               string
+}
+
+func (e *ScopesTableEngine) List(listQuery ScopeListQuery, limit, offset string) (*EntityScopes, error) {
+	rows := EntityScopes{}
+
+	args := []interface{}{}
+	andSqlSlice := []string{}
+
+	if listQuery.ResourceDomainName != "" {
+		andSqlSlice = append(andSqlSlice, "`resource_domain_name` = ?")
+		args = append(args, listQuery.ResourceDomainName)
+	}
+	if listQuery.ResourceName != "" {
+		andSqlSlice = append(andSqlSlice, "`resource_name` = ?")
+		args = append(args, listQuery.ResourceName)
+	}
+	if listQuery.Type != "" {
+		andSqlSlice = append(andSqlSlice, "`type` = ?")
+		args = append(args, listQuery.Type)
+	}
+
+	if listQuery.Name != "" && listQuery.Name != nil {
+		t := reflect.TypeOf(listQuery.Name).String()
+		if t == "string" {
+			andSqlSlice = append(andSqlSlice, "`name` = ?")
+			args = append(args, listQuery.Name.(string))
+		} else if t == "[]string" {
+			orSqlSlice := []string{}
+			for _, v := range listQuery.Name.([]string) {
+				orSqlSlice = append(orSqlSlice, "`name` = ?")
+				args = append(args, v)
+			}
+
+			orSQL := strings.Join(orSqlSlice[:], " OR ")
+			andSqlSlice = append(andSqlSlice, `(`+orSQL+`)`)
+		}
+	}
+
+	andSQL := "1"
+	if len(andSqlSlice) >= 1 {
+		andSQL = strings.Join(andSqlSlice[:], " AND ")
+	}
+
+	q := `SELECT * FROM ` + e.TblName + ` WHERE ` + andSQL + ` LIMIT ` + limit + ` OFFSET ` + offset
+
+	if err := e.Engine.Select(&rows, q, args...); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil
 		} else {
@@ -98,26 +142,12 @@ func (e *ScopesTableEngine) List(id string) (*EntityScope, error) {
 		}
 	}
 
-	return &row, nil
+	return &rows, nil
 }
 
-func (e *ScopesTableEngine) GetByID(id string) (*EntityScope, error) {
+func (e *ScopesTableEngine) GetByName(identity string) (*EntityScope, error) {
 	row := EntityScope{}
-	q := `SELECT * FROM ` + e.TblName + ` WHERE id = UUID_TO_BIN(?);`
-	if err := e.Engine.Get(&row, q, id); err != nil {
-		if err == sql.ErrNoRows {
-			return nil, nil
-		} else {
-			return nil, err
-		}
-	}
-
-	return &row, nil
-}
-
-func (e *ScopesTableEngine) GetByIdentity(identity string) (*EntityScope, error) {
-	row := EntityScope{}
-	q := `SELECT * FROM ` + e.TblName + ` WHERE identity = ?;`
+	q := `SELECT * FROM ` + e.TblName + ` WHERE name = ?;`
 	if err := e.Engine.Get(&row, q, identity); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil
@@ -129,27 +159,9 @@ func (e *ScopesTableEngine) GetByIdentity(identity string) (*EntityScope, error)
 	return &row, nil
 }
 
-func (e *ScopesTableEngine) ResetPwd(id *uuid.UUID, password string, saltBytes []byte) (int64, error) {
-	salt := string(saltBytes)
-
-	pwdBytes := []byte(password + salt)
-
-	hashBytes, hashErr := bcrypt.GenerateFromPassword(pwdBytes, bcrypt.DefaultCost)
-	if hashErr != nil {
-		return 0, hashErr
-	}
-
-	q := `UPDATE ` + e.TblName + ` SET password = ? WHERE id = UUID_TO_BIN(?);`
-	if rst, err := e.Exec(q, hashBytes, &id); err != nil {
-		return 0, err
-	} else {
-		return rst.RowsAffected()
-	}
-}
-
-func (e *ScopesTableEngine) UpdateStatus(id *uuid.UUID, status string) (int64, error) {
-	q := `UPDATE ` + e.TblName + ` SET status = ? WHERE id = UUID_TO_BIN(?);`
-	if rst, err := e.Exec(q, status, &id); err != nil {
+func (e *ScopesTableEngine) DeleteByDomainName(resDomainName string) (int64, error) {
+	q := `DELETE FROM ` + e.TblName + ` WHERE resource_domain_name = ?;`
+	if rst, err := e.Exec(q, resDomainName); err != nil {
 		return 0, err
 	} else {
 		return rst.RowsAffected()

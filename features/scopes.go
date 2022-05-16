@@ -14,7 +14,7 @@ func LoadScopes(e *gin.Engine, cfg *config.Config) {
 	scopesV1 := feature.New(e, "/scopes/v1")
 
 	scopesV1.GET("/scopes/:name", c.GetOne())
-	scopesV1.GET("/scopes", c.List()) // skip=offset=host=&name=
+	scopesV1.GET("/scopes", c.List()) // ?limit=offset=resourceDomainName=&name=n1|n2
 	scopesV1.POST("/scopes", c.Create())
-	scopesV1.DELETE("/scopes", c.DeleteByDomainName()) // resourceDomainName=
+	scopesV1.DELETE("/scopes", c.DeleteByDomainName()) // ?resourceDomainName=
 }

@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS scopes(
     `resource_domain_name` VARCHAR(127) NOT NULL,
     `resource_name` VARCHAR(127) NOT NULL,
     `name` VARCHAR(127) NOT NULL,
-    `type` ENUM('public', 'priavte') NOT NULL,
+    `type` ENUM('public', 'private') NOT NULL,
     `ctime` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `mtime` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY(`id`),
