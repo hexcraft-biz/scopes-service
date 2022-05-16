@@ -91,8 +91,12 @@ type ScopeListQuery struct {
 	Type               string
 }
 
-func (e *ScopesTableEngine) List(listQuery ScopeListQuery, limit, offset string) (*EntityScopes, error) {
+func (e *ScopesTableEngine) List(listQuery ScopeListQuery, pg *model.Pagination) (*EntityScopes, error) {
 	rows := EntityScopes{}
+
+	if pg == nil {
+		pg = model.NewDefaultPagination()
+	}
 
 	args := []interface{}{}
 	andSqlSlice := []string{}
@@ -132,7 +136,7 @@ func (e *ScopesTableEngine) List(listQuery ScopeListQuery, limit, offset string)
 		andSQL = strings.Join(andSqlSlice[:], " AND ")
 	}
 
-	q := `SELECT * FROM ` + e.TblName + ` WHERE ` + andSQL + ` LIMIT ` + limit + ` OFFSET ` + offset
+	q := `SELECT * FROM ` + e.TblName + ` WHERE ` + andSQL + pg.ToString() + `;`
 
 	if err := e.Engine.Select(&rows, q, args...); err != nil {
 		if err == sql.ErrNoRows {

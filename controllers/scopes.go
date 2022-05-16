@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-sql-driver/mysql"
 	"github.com/hexcraft-biz/controller"
+	"github.com/hexcraft-biz/model"
 	"github.com/hexcraft-biz/scopes-service/config"
 	"github.com/hexcraft-biz/scopes-service/models"
 )
@@ -70,8 +71,8 @@ type listParams struct {
 	ResourceName       string `form:"resourceName" binding:"omitempty,max=128"`
 	Name               string `form:"name" binding:"omitempty"`
 	Type               string `form:"type" binding:"omitempty,oneof='public' 'private'"`
-	Limit              string `form:"limit,default=20"`
-	Offset             string `form:"offset,default=0"`
+	Limit              uint64 `form:"limit,default=20"`
+	Offset             uint64 `form:"offset,default=0"`
 }
 
 func (ctrl *Scopes) List() gin.HandlerFunc {
@@ -95,7 +96,9 @@ func (ctrl *Scopes) List() gin.HandlerFunc {
 			q.Name = names[0]
 		}
 
-		if entityRes, err := models.NewScopesTableEngine(ctrl.DB).List(q, params.Limit, params.Offset); err != nil {
+		pg := model.NewPagination(params.Offset, params.Limit)
+
+		if entityRes, err := models.NewScopesTableEngine(ctrl.DB).List(q, pg); err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 			return
 		} else {
