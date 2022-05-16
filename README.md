@@ -11,7 +11,7 @@ $ docker-compose -f dev.yml up --build -d
 ### GET /healthCheck/v1/ping
 - Params
   - None
-- Resonse
+- Response
   - 200
 
 ### GET /scopes/v1/scopes/:name
@@ -20,7 +20,7 @@ $ docker-compose -f dev.yml up --build -d
     - name
       - Required : True
       - Desc : Scope Name
-- Resonse
+- Response
   - 200
   - 400
   - 401
@@ -53,7 +53,7 @@ $ docker-compose -f dev.yml up --build -d
       - Required : False
       - Desc : Offset
       - default : 0
-- Resonse
+- Response
   - 200
   - 400
   - 401
@@ -79,7 +79,7 @@ $ docker-compose -f dev.yml up --build -d
       - Required : True
       - Desc : Scope Type
       - Allow : `public`, `private`
-- Resonse
+- Response
   - 200
   - 400
   - 401
@@ -93,7 +93,7 @@ $ docker-compose -f dev.yml up --build -d
     - resourceDomainName
       - Required : True
       - Desc : Resource Domain Name
-- Resonse
+- Response
   - 204
   - 400
   - 401
