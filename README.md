@@ -23,6 +23,8 @@ $ docker-compose -f dev.yml up --build -d
 - Resonse
   - 200
   - 400
+  - 401
+  - 403
   - 404
   - 500
 
@@ -54,6 +56,8 @@ $ docker-compose -f dev.yml up --build -d
 - Resonse
   - 200
   - 400
+  - 401
+  - 403
   - 500
 
 ### POST /scopes/v1/scopes
@@ -78,6 +82,8 @@ $ docker-compose -f dev.yml up --build -d
 - Resonse
   - 200
   - 400
+  - 401
+  - 403
   - 409
   - 500
 
@@ -89,5 +95,8 @@ $ docker-compose -f dev.yml up --build -d
       - Desc : Resource Domain Name
 - Resonse
   - 204
+  - 400
+  - 401
+  - 403
   - 404
   - 500
