@@ -146,7 +146,7 @@ func (ctrl *Scopes) Create() gin.HandlerFunc {
 				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": absErr.Error()})
 				return
 			} else {
-				c.AbortWithStatusJSON(http.StatusOK, absRes)
+				c.AbortWithStatusJSON(http.StatusCreated, absRes)
 				return
 			}
 		}
