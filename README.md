@@ -69,7 +69,7 @@ $ docker-compose -f dev.yml up --build -d
       - Required : True
       - Allowed : `public`, `private`
 - Response
-  - 200
+  - 201
   - 400
   - 401
   - 403
