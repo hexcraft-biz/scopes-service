@@ -14,10 +14,10 @@ configmap:
 
 liveness:
   httpGet:
-    path: /
+    path: /healthCheck/v1/ping
     port: 80
 
 readiness:
   httpGet:
-    path: /
+    path: /healthCheck/v1/ping
     port: 80
