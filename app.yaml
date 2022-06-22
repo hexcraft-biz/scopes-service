@@ -1,0 +1,23 @@
+module:
+  name: scopes-service 
+  component: oauth2 
+  repo: karmaksana-io/scopes-service
+
+service:
+  ports:
+  - port: 80 
+    targetPort: 80 
+    protocol: TCP
+
+configmap:
+  envConfig: true 
+
+liveness:
+  httpGet:
+    path: /healthCheck/v1/ping
+    port: 80
+
+readiness:
+  httpGet:
+    path: /healthCheck/v1/ping
+    port: 80
