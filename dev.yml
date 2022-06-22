@@ -10,7 +10,7 @@ services:
       dockerfile: ./Dockerfile
     container_name: scopes-backend
     ports:
-      - "9527:9527"
+      - "9526:9526"
     env_file:
       - ./.env
     restart: on-failure
