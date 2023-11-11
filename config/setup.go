@@ -1,55 +1,31 @@
 package config
 
 import (
-	"github.com/hexcraft-biz/env"
-	"github.com/jmoiron/sqlx"
+	app "github.com/hexcraft-biz/envmod-app"
+	mysql "github.com/hexcraft-biz/envmod-mysql"
 )
 
-//================================================================
-// Env
-//================================================================
-type Env struct {
-	*env.Prototype
-}
-
-func FetchEnv() (*Env, error) {
-	if e, err := env.Fetch(); err != nil {
-		return nil, err
-	} else {
-		return &Env{
-			Prototype: e,
-		}, nil
-	}
-}
-
-//================================================================
-//
-//================================================================
+// ================================================================
+// Config
+// ================================================================
 type Config struct {
-	*Env
-	DB *sqlx.DB
+	*app.App
+	*mysql.Mysql
 }
 
 func Load() (*Config, error) {
-	e, err := FetchEnv()
+	emApp, err := app.New()
 	if err != nil {
 		return nil, err
 	}
 
-	return &Config{Env: e}, nil
-}
-
-func (cfg *Config) DBOpen(init bool) error {
-	var err error
-
-	cfg.DBClose()
-	cfg.DB, err = cfg.MysqlConnectWithMode(init)
-
-	return err
-}
-
-func (cfg *Config) DBClose() {
-	if cfg.DB != nil {
-		cfg.DB.Close()
+	emMysql, err := mysql.New()
+	if err != nil {
+		return nil, err
 	}
+
+	return &Config{
+		App:   emApp,
+		Mysql: emMysql,
+	}, nil
 }

@@ -10,14 +10,14 @@ func main() {
 	cfg, err := config.Load()
 	MustNot(err)
 
-	/*
-		if cfg.AutoCreateDBSchema {
-			MustNot(cfg.MysqlDBInit("./sql/"))
-		}
-	*/
+	if cfg.GinMode == "debug" && cfg.AutoCreateDBSchema {
+		MustNot(cfg.Mysql.DBInit("./sql/", []string{
+			"v1.0__schema.sql",
+		}))
+	}
 
-	MustNot(cfg.DBOpen(false))
-	// defer cfg.DBClose()
+	MustNot(cfg.Mysql.Open())
+	defer cfg.Mysql.Close()
 
 	GetEngine(cfg).Run(":" + cfg.AppPort)
 }
