@@ -1,12 +1,21 @@
 # scopes-service
 
+## Set up
 ```bash
-Testing Flow
+Set up env file
 $ cp ./.env.example ./.env
-$ docker-compose -f dev.yml up --build -d
+# Don't forget change your mysql connection info at .env file.
 ```
 
-## End Point
+## Deployment
+- Standalone Testing Flow
+```bash
+$ docker-compose -f dev.yml up --build -d
+```
+- Integration testing
+  - Please flollow [hexc-deploy](https://github.com/hexcraft-biz/hexc-deploy) README.md step.
+
+## API Endpoint Doc
 
 ### GET /healthCheck/v1/ping
 - Params
