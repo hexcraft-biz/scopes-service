@@ -1,10 +1,17 @@
 # scopes-service
 
 ```bash
-Testing Flow
+Set up env file
 $ cp ./.env.example ./.env
+# Don't forget change your mysql connection info at .env file.
+```
+
+- Standalone Testing Flow
+```bash
 $ docker-compose -f dev.yml up --build -d
 ```
+- Integration testing
+  - Please flollow [hexc-deploy](https://github.com/hexcraft-biz/hexc-deploy) README.md step.
 
 ## End Point
 
