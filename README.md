@@ -15,7 +15,7 @@ $ docker-compose -f dev.yml up --build -d
 - Integration testing
   - Please flollow [hexc-deploy](https://github.com/hexcraft-biz/hexc-deploy) README.md step.
 
-## End Point
+## API Endpoint Doc
 
 ### GET /healthCheck/v1/ping
 - Params
