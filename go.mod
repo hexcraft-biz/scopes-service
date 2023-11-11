@@ -8,7 +8,7 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/hexcraft-biz/controller v0.0.1
 	github.com/hexcraft-biz/envmod-app v0.0.1
-	github.com/hexcraft-biz/envmod-mysql v0.0.1
+	github.com/hexcraft-biz/envmod-mysql v0.0.2
 	github.com/hexcraft-biz/feature v0.0.1
 	github.com/hexcraft-biz/model v0.0.1
 	github.com/jmoiron/sqlx v1.3.5
