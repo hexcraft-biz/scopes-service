@@ -1,11 +1,13 @@
 # scopes-service
 
+## Set up
 ```bash
 Set up env file
 $ cp ./.env.example ./.env
 # Don't forget change your mysql connection info at .env file.
 ```
 
+## Deployment
 - Standalone Testing Flow
 ```bash
 $ docker-compose -f dev.yml up --build -d
